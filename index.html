@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Gift For You ❤️</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle, #ffdde1, #ee9ca7);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        /* Floating Hearts Background */
+        .bg-heart {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 2rem;
+            animation: float 6s infinite ease-in-out;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        /* 3D Box Container */
+        .box-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            transition: transform 0.5s;
+        }
+
+        .box-container:active {
+            transform: scale(0.95);
+        }
+
+        /* The Box Faces */
+        .box-face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: #d32f2f; /* Red Color */
+            border: 2px solid #b71c1c;
+            box-sizing: border-box;
+        }
+
+        .front  { transform: translateZ(100px); }
+        .back   { transform: translateZ(-100px) rotateY(180deg); }
+        .left   { transform: translateX(-100px) rotateY(-90deg); }
+        .right  { transform: translateX(100px) rotateY(90deg); }
+        .bottom { transform: translateY(100px) rotateX(-90deg); background: #b71c1c; }
+        
+        /* The Lid (Dhukkan) */
+        .lid {
+            position: absolute;
+            width: 204px;
+            height: 50px;
+            background: #d32f2f;
+            top: -50px;
+            left: -2px;
+            transform-origin: bottom;
+            transform: translateZ(100px);
+            transition: transform 1s ease-in-out;
+            transform-style: preserve-3d;
+            z-index: 10;
+        }
+
+        .lid-top {
+            position: absolute;
+            width: 204px;
+            height: 204px;
+            background: #e53935;
+            top: -204px;
+            left: 0;
+            transform-origin: bottom;
+            transform: rotateX(90deg);
+        }
+
+        /* Gold Ribbon */
+        .ribbon-vertical {
+            position: absolute;
+            width: 40px;
+            height: 100%;
+            background: #ffd700;
+            left: 80px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        .ribbon-horizontal {
+            position: absolute;
+            width: 100%;
+            height: 40px;
+            background: #ffd700;
+            top: 80px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+
+        /* The Message Card inside */
+        .card {
+            position: absolute;
+            width: 180px;
+            height: 140px;
+            background: white;
+            top: 30px;
+            left: 10px;
+            border-radius: 10px;
+            text-align: center;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            transform: translateZ(0px) translateY(0);
+            transition: all 1s ease-in-out 0.5s; /* Delay for lid open */
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card h3 {
+            margin: 0;
+            color: #d32f2f;
+            font-size: 1.2rem;
+        }
+        
+        .card p {
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* Animation Classes */
+        .box-container.open .lid {
+            transform: translateZ(100px) rotateX(120deg);
+        }
+
+        .box-container.open .card {
+            transform: translateZ(0px) translateY(-180px);
+            opacity: 1;
+            z-index: 5;
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: 50px;
+            color: #d32f2f;
+            font-weight: bold;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Background Hearts -->
+    <div class="bg-heart" style="left: 10%; animation-duration: 5s;">❤️</div>
+    <div class="bg-heart" style="left: 30%; animation-duration: 7s;">💖</div>
+    <div class="bg-heart" style="left: 70%; animation-duration: 4s;">❤️</div>
+    <div class="bg-heart" style="left: 90%; animation-duration: 6s;">💕</div>
+
+    <!-- The 3D Box -->
+    <div class="box-container" onclick="openGift()">
+        
+        <!-- Lid (Dhukkan) -->
+        <div class="lid">
+            <div class="lid-top">
+                <div class="ribbon-vertical"></div>
+                <div class="ribbon-horizontal"></div>
+            </div>
+            <div class="ribbon-vertical" style="height: 50px;"></div>
+        </div>
+
+        <!-- Box Sides -->
+        <div class="box-face front">
+            <div class="ribbon-vertical"></div>
+            <div class="ribbon-horizontal"></div>
+        </div>
+        <div class="box-face back"></div>
+        <div class="box-face left"></div>
+        <div class="box-face right"></div>
+        <div class="box-face bottom"></div>
+
+        <!-- Hidden Message Card -->
+        <div class="card">
+            <h3>I Love You! ❤️</h3>
+            <p>You are the best thing that ever happened to me.</p>
+        </div>
+
+    </div>
+
+    <div class="instruction">Tap the box to open! 👇</div>
+
+    <!-- Audio (Optional - Add your link later) -->
+    <audio id="giftMusic" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+
+    <script>
+        let isOpened = false;
+
+        function openGift() {
+            if (isOpened) return; // Agar pehle se khula hai to kuch mat karo
+            isOpened = true;
+
+            const box = document.querySelector('.box-container');
+            const music = document.getElementById('giftMusic');
+            const instruction = document.querySelector('.instruction');
+
+            // 1. Open Box Animation
+            box.classList.add('open');
+            instruction.style.display = 'none';
+
+            // 2. Play Music (Browser policy requires user interaction)
+            // music.play().catch(error => console.log("Music play failed:", error));
+
+            // 3. Confetti Blast (Patakhe)
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            // Extra Confetti after delay
+            setTimeout(() => {
+                confetti({
+                    particleCount: 100,
+                    spread: 100,
+                    origin: { y: 0.6 },
+                    colors: ['#ff0000', '#ffd700', '#ffffff']
+                });
+            }, 500);
+        }
+
+        // FUTURE: Yahan hum Firebase se data load karenge
+        // const urlParams = new URLSearchParams(window.location.search);
+        // const giftId = urlParams.get('id');
+        // if(giftId) { loadGiftData(giftId); }
+    </script>
+
+</body>
+</html>
