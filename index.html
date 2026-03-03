@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surprise Gift ❤️</title>
+    <title>Your Magic Gift ❤️</title>
+    
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- Confetti Effect -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <style>
         body {
             margin: 0; padding: 0;
@@ -18,19 +22,17 @@
             overflow: hidden;
             perspective: 1200px;
         }
-        .bg-heart { position: absolute; color: rgba(255, 255, 255, 0.6); font-size: 2rem; animation: floatUp 8s infinite linear; z-index: -1; }
-        @keyframes floatUp {
-            0% { transform: translateY(110vh) scale(0.5); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
-        }
+
+        /* 3D Box Styles */
         .scene {
-            width: 200px; height: 200px;
+            width: 250px; height: 250px;
             position: relative;
             transform-style: preserve-3d;
             transition: transform 1s;
             cursor: pointer;
+            margin-top: 50px;
         }
+
         .cube {
             width: 100%; height: 100%;
             position: absolute;
@@ -38,63 +40,96 @@
             transform: rotateX(-20deg) rotateY(-30deg);
             transition: transform 1s;
         }
+
         .cube__face {
-            position: absolute; width: 200px; height: 200px;
+            position: absolute; width: 250px; height: 250px;
             border: 2px solid #b71c1c;
             background: rgba(211, 47, 47, 0.95);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
         }
-        .cube__face--front  { transform: rotateY(  0deg) translateZ(100px); }
-        .cube__face--right  { transform: rotateY( 90deg) translateZ(100px); }
-        .cube__face--back   { transform: rotateY(180deg) translateZ(100px); }
-        .cube__face--left   { transform: rotateY(-90deg) translateZ(100px); }
-        .cube__face--top    { transform: rotateX( 90deg) translateZ(100px); background: #c62828; }
-        .cube__face--bottom { transform: rotateX(-90deg) translateZ(100px); background: #8e0000; }
+
+        .cube__face--front  { transform: rotateY(  0deg) translateZ(125px); }
+        .cube__face--right  { transform: rotateY( 90deg) translateZ(125px); }
+        .cube__face--back   { transform: rotateY(180deg) translateZ(125px); }
+        .cube__face--left   { transform: rotateY(-90deg) translateZ(125px); }
+        .cube__face--top    { transform: rotateX( 90deg) translateZ(125px); background: #c62828; }
+        .cube__face--bottom { transform: rotateX(-90deg) translateZ(125px); background: #8e0000; }
+
+        /* Ribbons */
         .ribbon { position: absolute; background: #FFD700; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
-        .ribbon-v { width: 40px; height: 100%; left: 80px; top: 0; }
-        .ribbon-h { width: 100%; height: 40px; top: 80px; left: 0; }
+        .ribbon-v { width: 50px; height: 100%; left: 100px; top: 0; }
+        .ribbon-h { width: 100%; height: 50px; top: 100px; left: 0; }
+
+        /* Open Animation */
         .scene.open .cube__face--top {
-            transform: rotateX(150deg) translateZ(100px);
+            transform: rotateX(150deg) translateZ(125px);
             opacity: 0.8; transition: transform 1s;
         }
+
+        /* The Card inside (Message & Photo) */
         .content-card {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%) translateZ(0) scale(0);
-            width: 260px; background: white; padding: 15px;
-            border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            text-align: center; opacity: 0;
-            transition: all 1s ease 0.5s; z-index: 100; border: 4px solid #d32f2f;
+            width: 280px; 
+            background: white; 
+            padding: 15px;
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            text-align: center; 
+            opacity: 0;
+            transition: all 1s ease 0.5s; 
+            z-index: 100; 
+            border: 4px solid #d32f2f;
         }
+
         .scene.open .content-card {
-            transform: translate(-50%, -120%) translateZ(150px) scale(1);
+            transform: translate(-50%, -130%) translateZ(150px) scale(1);
             opacity: 1;
         }
+
+        /* IMAGE FIX - SABSE IMPORTANT PART */
         .content-card img {
-            width: 100%; max-height: 200px; object-fit: cover;
-            border-radius: 10px; margin-bottom: 10px; border: 2px solid #eee;
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 250px; /* Limit height */
+            object-fit: contain; /* Photo katega nahi */
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            background-color: #fff;
         }
-        .content-card h3 { margin: 5px 0; color: #d32f2f; font-size: 18px; }
-        .content-card p { font-size: 14px; color: #333; line-height: 1.4; }
+
+        .content-card h3 { margin: 5px 0; color: #d32f2f; font-size: 18px; font-weight: bold; }
+        .content-card p { font-size: 16px; color: #333; line-height: 1.4; font-weight: 500;}
+
+        /* Loading Screen */
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #d32f2f; font-size: 20px; font-weight: bold; }
+        
         .instruction {
-            margin-top: 150px; font-size: 1.2rem; color: #d32f2f;
+            margin-top: 180px; font-size: 1.2rem; color: #d32f2f;
             font-weight: bold; animation: bounce 2s infinite;
             background: rgba(255,255,255,0.8); padding: 10px 20px; border-radius: 30px;
         }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; color: #d32f2f; font-size: 20px; }
+
     </style>
 </head>
 <body>
 
     <div id="loading">
-        <div style="font-size: 50px; margin-bottom: 20px;">🎁</div>
-        Preparing Surprise...
+        <div style="font-size: 40px; margin-bottom: 10px;">🎁</div>
+        Loading Gift...
     </div>
 
-    <div class="bg-heart" style="left: 10%; animation-duration: 6s;">❤️</div>
-    <div class="bg-heart" style="left: 30%; animation-duration: 8s;">💖</div>
-    <div class="bg-heart" style="left: 70%; animation-duration: 5s;">💕</div>
+    <!-- Background Decoration -->
+    <div style="position:absolute; width:100%; height:100%; overflow:hidden; z-index:-1;">
+        <div style="position:absolute; top:10%; left:10%; font-size:30px; opacity:0.5;">❤️</div>
+        <div style="position:absolute; top:20%; right:20%; font-size:40px; opacity:0.3;">💖</div>
+        <div style="position:absolute; bottom:10%; left:20%; font-size:35px; opacity:0.4;">💕</div>
+    </div>
 
+    <!-- The 3D Box -->
     <div class="scene" id="scene" onclick="openGift()">
         <div class="cube">
             <div class="cube__face cube__face--front"><div class="ribbon ribbon-v"></div><div class="ribbon ribbon-h"></div></div>
@@ -104,17 +139,23 @@
             <div class="cube__face cube__face--top"><div class="ribbon ribbon-v"></div><div class="ribbon ribbon-h"></div></div>
             <div class="cube__face cube__face--bottom"></div>
         </div>
+
+        <!-- The Message Card -->
         <div class="content-card">
-            <h3 id="sender">From: Secret</h3>
-            <img id="giftImg" src="" alt="Gift Photo">
-            <p id="message">You have a surprise!</p>
+            <h3 id="sender">From: ...</h3>
+            
+            <!-- Photo Area -->
+            <img id="giftImg" src="" alt="Gift Photo" onerror="this.style.display='none'">
+            
+            <p id="message">...</p>
         </div>
     </div>
-    <div class="instruction" id="tapText">Tap to Open! 👆</div>
+
+    <div class="instruction" id="tapText">Tap Box to Open! 👆</div>
 
     <script>
         // ============================================
-        // 🔴 PASTE YOUR FIREBASE CONFIG HERE CAREFULLY
+        // 🔴 APNA FIREBASE CONFIG YAHAN DALO
         // ============================================
         const firebaseConfig = {
     apiKey: "AIzaSyB24SehaHDOLuwzTLCkgCwXSpa6dVzrMOw",
@@ -131,6 +172,8 @@
         try {
             firebase.initializeApp(firebaseConfig);
             const db = firebase.database();
+            
+            // Get ID from URL
             const urlParams = new URLSearchParams(window.location.search);
             const giftId = urlParams.get('id');
 
@@ -138,29 +181,72 @@
                 db.ref('Gifts/' + giftId).once('value').then((snapshot) => {
                     if (snapshot.exists()) {
                         const data = snapshot.val();
-                        document.getElementById('sender').innerText = "From: " + data.sender;
-                        document.getElementById('message').innerText = data.message;
-                        document.getElementById('giftImg').src = data.photo;
+                        
+                        // 1. Set Sender Name
+                        document.getElementById('sender').innerText = "From: " + (data.sender || "Secret");
+                        
+                        // 2. Set Message
+                        document.getElementById('message').innerText = data.message || "Surprise!";
+                        
+                        // 3. Set Photo (With Security Fix)
+                        const imgEl = document.getElementById('giftImg');
+                        if (data.photo && data.photo.length > 5) {
+                            // ImgBB fix: ensure https
+                            let safeUrl = data.photo;
+                            if (safeUrl.startsWith('http://')) {
+                                safeUrl = safeUrl.replace('http://', 'https://');
+                            }
+                            imgEl.src = safeUrl;
+                        } else {
+                            // No photo provided
+                            imgEl.style.display = 'none';
+                        }
+                        
                         document.getElementById('loading').style.display = 'none';
                     } else {
-                        document.getElementById('loading').innerHTML = "Gift not found! 😢";
+                        document.getElementById('loading').innerHTML = "<h3>Gift Expired or Wrong Link! ❌</h3>";
                     }
+                }).catch(e => {
+                    console.error(e);
+                    document.getElementById('loading').innerText = "Error Loading Gift!";
                 });
             } else {
+                // Demo Mode (Jab bina ID ke website khule)
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('message').innerText = "Open via App Link!";
+                document.getElementById('sender').innerText = "From: Josh App";
+                document.getElementById('message').innerText = "Please create a link from the App!";
+                document.getElementById('giftImg').src = "https://cdn-icons-png.flaticon.com/512/4213/4213958.png";
             }
         } catch (e) {
-            alert("Firebase Config Error!");
+            alert("Firebase Config Error! Please check index.html code.");
         }
 
+        // Animation Logic
         let opened = false;
         function openGift() {
             if (opened) return;
             opened = true;
+            
             document.getElementById('scene').classList.add('open');
             document.getElementById('tapText').style.display = 'none';
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+            // Confetti
+            var end = Date.now() + (3 * 1000);
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
         }
     </script>
 </body>
