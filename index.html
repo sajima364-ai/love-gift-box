@@ -4,162 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magic Gift 🎁</title>
-    
-    <!-- Privacy Referrer Fix -->
     <meta name="referrer" content="no-referrer">
-
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <!-- Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        body {
-            margin: 0; padding: 0;
-            background: radial-gradient(circle, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-            height: 100vh;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            perspective: 1200px;
-        }
-
-        /* 3D Box Container */
-        .scene {
-            width: 260px; height: 260px;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 1s;
-            cursor: pointer;
-            margin-top: 50px;
-        }
-
-        .cube {
-            width: 100%; height: 100%;
-            position: absolute;
-            transform-style: preserve-3d;
-            transform: rotateX(-20deg) rotateY(-30deg);
-            transition: transform 1s;
-        }
-
-        .cube__face {
-            position: absolute; width: 260px; height: 260px;
-            border: 2px solid #b71c1c;
-            background: rgba(229, 57, 53, 0.95);
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
-        }
-
-        .cube__face--front  { transform: rotateY(  0deg) translateZ(130px); }
-        .cube__face--right  { transform: rotateY( 90deg) translateZ(130px); }
-        .cube__face--back   { transform: rotateY(180deg) translateZ(130px); }
-        .cube__face--left   { transform: rotateY(-90deg) translateZ(130px); }
-        .cube__face--top    { transform: rotateX( 90deg) translateZ(130px); background: #c62828; }
-        .cube__face--bottom { transform: rotateX(-90deg) translateZ(130px); background: #8e0000; }
-
-        /* Ribbons */
-        .ribbon { position: absolute; background: #FFD700; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
-        .ribbon-v { width: 50px; height: 100%; left: 105px; top: 0; }
-        .ribbon-h { width: 100%; height: 50px; top: 105px; left: 0; }
-
-        .scene.open .cube__face--top {
-            transform: rotateX(150deg) translateZ(130px);
-            opacity: 0.8; transition: transform 1s;
-        }
-
-        /* Message Card */
-        .content-card {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%) translateZ(0) scale(0);
-            width: 280px; 
-            background: white; 
-            padding: 15px;
-            border-radius: 15px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            text-align: center; 
-            opacity: 0;
-            transition: all 1s ease 0.5s; 
-            z-index: 100; 
-            border: 4px solid #d32f2f;
-        }
-
-        .scene.open .content-card {
-            transform: translate(-50%, -130%) translateZ(150px) scale(1);
-            opacity: 1;
-        }
-
-        /* IMAGE STYLE - FIXED */
-        .content-card img {
-            display: block;
-            width: 100%;
-            height: auto;
-            max-height: 280px;
-            object-fit: contain; /* Photo poori dikhegi */
-            border-radius: 10px;
-            margin: 10px 0;
-            background-color: #f0f0f0;
-            min-height: 100px; /* Loading space */
-        }
-
-        .content-card h3 { margin: 5px 0; color: #d32f2f; font-size: 20px; font-weight: bold; }
-        .content-card p { font-size: 16px; color: #333; line-height: 1.4; font-weight: 500;}
-
-        /* Loading */
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #d32f2f; font-size: 22px; font-weight: bold; }
+        body { margin: 0; background: radial-gradient(circle, #ff9a9e, #fecfef); height: 100vh; display: flex; justify-content: center; align-items: center; font-family: sans-serif; perspective: 1200px; overflow: hidden; }
+        .scene { width: 250px; height: 250px; position: relative; transform-style: preserve-3d; transition: transform 1s; cursor: pointer; margin-top: 50px; }
+        .cube { width: 100%; height: 100%; position: absolute; transform-style: preserve-3d; transform: rotateX(-20deg) rotateY(-30deg); transition: transform 1s; }
+        .cube__face { position: absolute; width: 250px; height: 250px; border: 2px solid rgba(0,0,0,0.1); box-shadow: inset 0 0 30px rgba(0,0,0,0.2); }
+        .cube__face--front { transform: rotateY(0deg) translateZ(125px); }
+        .cube__face--right { transform: rotateY(90deg) translateZ(125px); }
+        .cube__face--back { transform: rotateY(180deg) translateZ(125px); }
+        .cube__face--left { transform: rotateY(-90deg) translateZ(125px); }
+        .cube__face--top { transform: rotateX(90deg) translateZ(125px); }
+        .cube__face--bottom { transform: rotateX(-90deg) translateZ(125px); }
         
-        .instruction {
-            margin-top: 200px; font-size: 1.2rem; color: #fff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            font-weight: bold; animation: bounce 2s infinite;
-            background: rgba(211, 47, 47, 0.9); padding: 10px 25px; border-radius: 30px;
-        }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .scene.open .cube__face--top { transform: rotateX(150deg) translateZ(125px); opacity: 0.8; transition: transform 1s; }
+        .content-card { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) translateZ(0) scale(0); width: 280px; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; transition: all 1s ease 0.5s; z-index: 100; border: 4px solid #d32f2f; }
+        .scene.open .content-card { transform: translate(-50%, -130%) translateZ(150px) scale(1); }
+        .content-card img { width: 100%; max-height: 280px; object-fit: contain; border-radius: 10px; margin: 10px 0; background: #f0f0f0; }
+        
+        /* --- 10 LEVELS STYLES --- */
+        .lvl-1 .cube__face { background: #e53935; border-color: #b71c1c; } .lvl-1 .cube__face--top { background: #c62828; }
+        .lvl-2 .cube__face { background: linear-gradient(45deg, #FFD700, #FFA000); } .lvl-2 .cube__face--top { background: #FFC107; }
+        .lvl-3 .cube__face { background: #000; border: 2px solid #00E5FF; box-shadow: 0 0 15px #00E5FF; } .lvl-3 .cube__face--top { background: #00BCD4; }
+        .lvl-4 .cube__face { background: #E91E63; } .lvl-4 .cube__face--top { background: #C2185B; }
+        .lvl-5 .cube__face { background: #212121; } .lvl-5 .cube__face--top { background: #000; }
+        .lvl-6 .cube__face { background: #795548; } .lvl-6 .cube__face--top { background: #5D4037; }
+        .lvl-7 .cube__face { background: linear-gradient(to right, #3f51b5, #9c27b0); } .lvl-7 .cube__face--top { background: #303F9F; }
+        .lvl-8 .cube__face { background: #E0F7FA; border: 1px solid #FFF; } .lvl-8 .cube__face--top { background: #B2EBF2; }
+        .lvl-9 .cube__face { background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); } 
+        .lvl-10 .cube__face { background: rgba(255,255,255,0.3); border: 1px solid white; backdrop-filter: blur(5px); } /* Glass */
 
     </style>
 </head>
 <body>
-
-    <div id="loading">
-        <div style="font-size: 50px; margin-bottom: 15px;">🎁</div>
-        Unpacking...
-    </div>
-
-    <!-- Background Decoration -->
-    <div style="position:absolute; width:100%; height:100%; overflow:hidden; z-index:-1;">
-        <div style="position:absolute; top:10%; left:10%; font-size:30px; opacity:0.5;">❤️</div>
-        <div style="position:absolute; top:20%; right:20%; font-size:40px; opacity:0.3;">💖</div>
-        <div style="position:absolute; bottom:10%; left:20%; font-size:35px; opacity:0.4;">💕</div>
-    </div>
-
-    <!-- 3D Box -->
+    <div id="loading" style="font-size:30px; font-weight:bold; color:#d32f2f;">Loading...</div>
     <div class="scene" id="scene" onclick="openGift()">
-        <div class="cube">
-            <div class="cube__face cube__face--front"><div class="ribbon ribbon-v"></div><div class="ribbon ribbon-h"></div></div>
-            <div class="cube__face cube__face--back"></div>
-            <div class="cube__face cube__face--right"></div>
-            <div class="cube__face cube__face--left"></div>
-            <div class="cube__face cube__face--top"><div class="ribbon ribbon-v"></div><div class="ribbon ribbon-h"></div></div>
-            <div class="cube__face cube__face--bottom"></div>
+        <div class="cube lvl-1" id="boxCube">
+            <div class="cube__face cube__face--front"></div><div class="cube__face cube__face--back"></div>
+            <div class="cube__face cube__face--right"></div><div class="cube__face cube__face--left"></div>
+            <div class="cube__face cube__face--top"></div><div class="cube__face cube__face--bottom"></div>
         </div>
-
-        <!-- Hidden Card -->
         <div class="content-card">
             <h3 id="sender">From: ...</h3>
-            
-            <!-- Photo (Initially hidden default) -->
-            <img id="giftImg" src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" alt="Gift Photo">
-            
+            <img id="giftImg" src="" alt="Photo" referrerpolicy="no-referrer" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4213/4213958.png'">
             <p id="message">...</p>
         </div>
     </div>
-
-    <div class="instruction" id="tapText">Tap Box to Open! 👆</div>
+    <div style="margin-top:200px; font-weight:bold; color:white; background:red; padding:10px 20px; border-radius:30px;">Tap Box 👆</div>
 
     <script>
-        // ============================================
-        // 🔴 APNA FIREBASE CONFIG YAHAN DALO 🔴
-        // ============================================
         const firebaseConfig = {
     apiKey: "AIzaSyB24SehaHDOLuwzTLCkgCwXSpa6dVzrMOw",
     authDomain: "josh-de7d4.firebaseapp.com",
@@ -170,92 +67,36 @@
     appId: "1:1036207436233:web:59aa121374c9a89d4e3818",
     measurementId: "G-BC157TM372"
   };
-        // ============================================
 
         try {
             firebase.initializeApp(firebaseConfig);
             const db = firebase.database();
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const giftId = urlParams.get('id');
+            const id = new URLSearchParams(window.location.search).get('id');
 
-            if (giftId) {
-                db.ref('Gifts/' + giftId).once('value').then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
+            if (id) {
+                db.ref('Gifts/' + id).once('value').then(s => {
+                    if (s.exists()) {
+                        const d = s.val();
+                        document.getElementById('sender').innerText = "From: " + (d.sender || "Secret");
+                        document.getElementById('message').innerText = d.message;
                         
-                        document.getElementById('sender').innerText = "From: " + (data.sender || "Secret");
-                        document.getElementById('message').innerText = data.message || "Surprise!";
-                        
-                        // --- 🔥 MAGIC PROXY FIX (SABSE IMPORTTANT) 🔥 ---
-                        const imgEl = document.getElementById('giftImg');
-                        
-                        if (data.photo && data.photo.length > 10) {
-                            
-                            // Agar link default image nahi hai (Matlab user ki photo hai)
-                            if (!data.photo.includes("flaticon.com")) {
-                                
-                                // Hum 'wsrv.nl' proxy use karenge. Ye ImgBB block ko tod dega.
-                                const originalUrl = data.photo;
-                                const proxyUrl = "https://wsrv.nl/?url=" + encodeURIComponent(originalUrl) + "&w=500&output=jpg";
-                                
-                                console.log("Proxy Loading: " + proxyUrl);
-                                imgEl.src = proxyUrl;
-                                
-                            } else {
-                                // Default image
-                                imgEl.src = data.photo;
-                            }
-                            
+                        if (d.photo && !d.photo.includes("flaticon")) {
+                            document.getElementById('giftImg').src = "https://wsrv.nl/?url=" + encodeURIComponent(d.photo) + "&w=500&output=jpg";
                         } else {
-                            // Koi photo nahi hai to default
-                            imgEl.src = "https://cdn-icons-png.flaticon.com/512/4213/4213958.png";
+                            document.getElementById('giftImg').src = "https://cdn-icons-png.flaticon.com/512/4213/4213958.png";
                         }
-                        
+
+                        const level = d.boxLevel || 1;
+                        document.getElementById('boxCube').className = "cube lvl-" + level;
+
                         document.getElementById('loading').style.display = 'none';
-                    } else {
-                        document.getElementById('loading').innerHTML = "<h3>Gift Expired! ❌</h3>";
                     }
-                }).catch(e => {
-                    console.error(e);
-                    document.getElementById('loading').innerText = "Network Error!";
                 });
-            } else {
-                // Demo Mode
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('sender').innerText = "From: Josh App";
-                document.getElementById('message').innerText = "Create your own gift in the App!";
             }
-        } catch (e) {
-            alert("Firebase Config Error! Check HTML file.");
-        }
+        } catch (e) { alert("Config Error"); }
 
-        // Animation
-        let opened = false;
-        function openGift() {
-            if (opened) return;
-            opened = true;
-            
-            document.getElementById('scene').classList.add('open');
-            document.getElementById('tapText').style.display = 'none';
-
-            var end = Date.now() + (3 * 1000);
-            (function frame() {
-                confetti({
-                    particleCount: 5,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 }
-                });
-                confetti({
-                    particleCount: 5,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 }
-                });
-                if (Date.now() < end) requestAnimationFrame(frame);
-            }());
-        }
+        let open=false;
+        function openGift(){ if(open)return; open=true; document.querySelector('.scene').classList.add('open'); confetti({particleCount:100, spread:70, origin:{y:0.6}}); }
     </script>
 </body>
 </html>
