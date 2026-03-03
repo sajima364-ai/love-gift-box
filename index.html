@@ -3,253 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Special Gift For You ❤️</title>
+    <title>Surprise Gift ❤️</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background: radial-gradient(circle, #ffdde1, #ee9ca7);
+            margin: 0; padding: 0;
+            background: radial-gradient(circle, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Arial', sans-serif;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            font-family: 'Segoe UI', sans-serif;
             overflow: hidden;
-            perspective: 1000px;
+            perspective: 1200px;
         }
-
-        /* Floating Hearts Background */
-        .bg-heart {
-            position: absolute;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 2rem;
-            animation: float 6s infinite ease-in-out;
-            z-index: -1;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+        .bg-heart { position: absolute; color: rgba(255, 255, 255, 0.6); font-size: 2rem; animation: floatUp 8s infinite linear; z-index: -1; }
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) scale(0.5); opacity: 0; }
             50% { opacity: 1; }
-            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
         }
-
-        /* 3D Box Container */
-        .box-container {
+        .scene {
+            width: 200px; height: 200px;
             position: relative;
-            width: 200px;
-            height: 200px;
             transform-style: preserve-3d;
+            transition: transform 1s;
             cursor: pointer;
-            transition: transform 0.5s;
         }
-
-        .box-container:active {
-            transform: scale(0.95);
-        }
-
-        /* The Box Faces */
-        .box-face {
+        .cube {
+            width: 100%; height: 100%;
             position: absolute;
-            width: 200px;
-            height: 200px;
-            background: #d32f2f; /* Red Color */
-            border: 2px solid #b71c1c;
-            box-sizing: border-box;
-        }
-
-        .front  { transform: translateZ(100px); }
-        .back   { transform: translateZ(-100px) rotateY(180deg); }
-        .left   { transform: translateX(-100px) rotateY(-90deg); }
-        .right  { transform: translateX(100px) rotateY(90deg); }
-        .bottom { transform: translateY(100px) rotateX(-90deg); background: #b71c1c; }
-        
-        /* The Lid (Dhukkan) */
-        .lid {
-            position: absolute;
-            width: 204px;
-            height: 50px;
-            background: #d32f2f;
-            top: -50px;
-            left: -2px;
-            transform-origin: bottom;
-            transform: translateZ(100px);
-            transition: transform 1s ease-in-out;
             transform-style: preserve-3d;
-            z-index: 10;
+            transform: rotateX(-20deg) rotateY(-30deg);
+            transition: transform 1s;
         }
-
-        .lid-top {
-            position: absolute;
-            width: 204px;
-            height: 204px;
-            background: #e53935;
-            top: -204px;
-            left: 0;
-            transform-origin: bottom;
-            transform: rotateX(90deg);
+        .cube__face {
+            position: absolute; width: 200px; height: 200px;
+            border: 2px solid #b71c1c;
+            background: rgba(211, 47, 47, 0.95);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
-
-        /* Gold Ribbon */
-        .ribbon-vertical {
-            position: absolute;
-            width: 40px;
-            height: 100%;
-            background: #ffd700;
-            left: 80px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        .cube__face--front  { transform: rotateY(  0deg) translateZ(100px); }
+        .cube__face--right  { transform: rotateY( 90deg) translateZ(100px); }
+        .cube__face--back   { transform: rotateY(180deg) translateZ(100px); }
+        .cube__face--left   { transform: rotateY(-90deg) translateZ(100px); }
+        .cube__face--top    { transform: rotateX( 90deg) translateZ(100px); background: #c62828; }
+        .cube__face--bottom { transform: rotateX(-90deg) translateZ(100px); background: #8e0000; }
+        .ribbon { position: absolute; background: #FFD700; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
+        .ribbon-v { width: 40px; height: 100%; left: 80px; top: 0; }
+        .ribbon-h { width: 100%; height: 40px; top: 80px; left: 0; }
+        .scene.open .cube__face--top {
+            transform: rotateX(150deg) translateZ(100px);
+            opacity: 0.8; transition: transform 1s;
         }
-        .ribbon-horizontal {
-            position: absolute;
-            width: 100%;
-            height: 40px;
-            background: #ffd700;
-            top: 80px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        .content-card {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) translateZ(0) scale(0);
+            width: 260px; background: white; padding: 15px;
+            border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center; opacity: 0;
+            transition: all 1s ease 0.5s; z-index: 100; border: 4px solid #d32f2f;
         }
-
-        /* The Message Card inside */
-        .card {
-            position: absolute;
-            width: 180px;
-            height: 140px;
-            background: white;
-            top: 30px;
-            left: 10px;
-            border-radius: 10px;
-            text-align: center;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            transform: translateZ(0px) translateY(0);
-            transition: all 1s ease-in-out 0.5s; /* Delay for lid open */
-            opacity: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .card h3 {
-            margin: 0;
-            color: #d32f2f;
-            font-size: 1.2rem;
-        }
-        
-        .card p {
-            font-size: 0.9rem;
-            color: #555;
-        }
-
-        /* Animation Classes */
-        .box-container.open .lid {
-            transform: translateZ(100px) rotateX(120deg);
-        }
-
-        .box-container.open .card {
-            transform: translateZ(0px) translateY(-180px);
+        .scene.open .content-card {
+            transform: translate(-50%, -120%) translateZ(150px) scale(1);
             opacity: 1;
-            z-index: 5;
         }
-
+        .content-card img {
+            width: 100%; max-height: 200px; object-fit: cover;
+            border-radius: 10px; margin-bottom: 10px; border: 2px solid #eee;
+        }
+        .content-card h3 { margin: 5px 0; color: #d32f2f; font-size: 18px; }
+        .content-card p { font-size: 14px; color: #333; line-height: 1.4; }
         .instruction {
-            position: absolute;
-            bottom: 50px;
-            color: #d32f2f;
-            font-weight: bold;
-            animation: bounce 2s infinite;
+            margin-top: 150px; font-size: 1.2rem; color: #d32f2f;
+            font-weight: bold; animation: bounce 2s infinite;
+            background: rgba(255,255,255,0.8); padding: 10px 20px; border-radius: 30px;
         }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; color: #d32f2f; font-size: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- Background Hearts -->
-    <div class="bg-heart" style="left: 10%; animation-duration: 5s;">❤️</div>
-    <div class="bg-heart" style="left: 30%; animation-duration: 7s;">💖</div>
-    <div class="bg-heart" style="left: 70%; animation-duration: 4s;">❤️</div>
-    <div class="bg-heart" style="left: 90%; animation-duration: 6s;">💕</div>
-
-    <!-- The 3D Box -->
-    <div class="box-container" onclick="openGift()">
-        
-        <!-- Lid (Dhukkan) -->
-        <div class="lid">
-            <div class="lid-top">
-                <div class="ribbon-vertical"></div>
-                <div class="ribbon-horizontal"></div>
-            </div>
-            <div class="ribbon-vertical" style="height: 50px;"></div>
-        </div>
-
-        <!-- Box Sides -->
-        <div class="box-face front">
-            <div class="ribbon-vertical"></div>
-            <div class="ribbon-horizontal"></div>
-        </div>
-        <div class="box-face back"></div>
-        <div class="box-face left"></div>
-        <div class="box-face right"></div>
-        <div class="box-face bottom"></div>
-
-        <!-- Hidden Message Card -->
-        <div class="card">
-            <h3>I Love You! ❤️</h3>
-            <p>You are the best thing that ever happened to me.</p>
-        </div>
-
+    <div id="loading">
+        <div style="font-size: 50px; margin-bottom: 20px;">🎁</div>
+        Preparing Surprise...
     </div>
 
-    <div class="instruction">Tap the box to open! 👇</div>
+    <div class="bg-heart" style="left: 10%; animation-duration: 6s;">❤️</div>
+    <div class="bg-heart" style="left: 30%; animation-duration: 8s;">💖</div>
+    <div class="bg-heart" style="left: 70%; animation-duration: 5s;">💕</div>
 
-    <!-- Audio (Optional - Add your link later) -->
-    <audio id="giftMusic" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+    <div class="scene" id="scene" onclick="openGift()">
+        <div class="cube">
+            <div class="cube__face cube__face--front"><div class="ribbon ribbon-v"></div><div class="ribbon ribbon-h"></div></div>
+            <div class="cube__face cube__face--back"></div>
+            <div class="cube__face cube__face--right"></div>
+            <div class="cube__face cube__face--left"></div>
+            <div class="cube__face cube__face--top"><div class="ribbon ribbon-v"></div><div class="ribbon ribbon-h"></div></div>
+            <div class="cube__face cube__face--bottom"></div>
+        </div>
+        <div class="content-card">
+            <h3 id="sender">From: Secret</h3>
+            <img id="giftImg" src="" alt="Gift Photo">
+            <p id="message">You have a surprise!</p>
+        </div>
+    </div>
+    <div class="instruction" id="tapText">Tap to Open! 👆</div>
 
     <script>
-        let isOpened = false;
+        // ============================================
+        // 🔴 PASTE YOUR FIREBASE CONFIG HERE CAREFULLY
+        // ============================================
+        const firebaseConfig = {
+    apiKey: "AIzaSyB24SehaHDOLuwzTLCkgCwXSpa6dVzrMOw",
+    authDomain: "josh-de7d4.firebaseapp.com",
+    databaseURL: "https://josh-de7d4-default-rtdb.firebaseio.com",
+    projectId: "josh-de7d4",
+    storageBucket: "josh-de7d4.firebasestorage.app",
+    messagingSenderId: "1036207436233",
+    appId: "1:1036207436233:web:59aa121374c9a89d4e3818",
+    measurementId: "G-BC157TM372"
+  };
+        // ============================================
 
-        function openGift() {
-            if (isOpened) return; // Agar pehle se khula hai to kuch mat karo
-            isOpened = true;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.database();
+            const urlParams = new URLSearchParams(window.location.search);
+            const giftId = urlParams.get('id');
 
-            const box = document.querySelector('.box-container');
-            const music = document.getElementById('giftMusic');
-            const instruction = document.querySelector('.instruction');
-
-            // 1. Open Box Animation
-            box.classList.add('open');
-            instruction.style.display = 'none';
-
-            // 2. Play Music (Browser policy requires user interaction)
-            // music.play().catch(error => console.log("Music play failed:", error));
-
-            // 3. Confetti Blast (Patakhe)
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
-
-            // Extra Confetti after delay
-            setTimeout(() => {
-                confetti({
-                    particleCount: 100,
-                    spread: 100,
-                    origin: { y: 0.6 },
-                    colors: ['#ff0000', '#ffd700', '#ffffff']
+            if (giftId) {
+                db.ref('Gifts/' + giftId).once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        document.getElementById('sender').innerText = "From: " + data.sender;
+                        document.getElementById('message').innerText = data.message;
+                        document.getElementById('giftImg').src = data.photo;
+                        document.getElementById('loading').style.display = 'none';
+                    } else {
+                        document.getElementById('loading').innerHTML = "Gift not found! 😢";
+                    }
                 });
-            }, 500);
+            } else {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('message').innerText = "Open via App Link!";
+            }
+        } catch (e) {
+            alert("Firebase Config Error!");
         }
 
-        // FUTURE: Yahan hum Firebase se data load karenge
-        // const urlParams = new URLSearchParams(window.location.search);
-        // const giftId = urlParams.get('id');
-        // if(giftId) { loadGiftData(giftId); }
+        let opened = false;
+        function openGift() {
+            if (opened) return;
+            opened = true;
+            document.getElementById('scene').classList.add('open');
+            document.getElementById('tapText').style.display = 'none';
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        }
     </script>
-
 </body>
 </html>
