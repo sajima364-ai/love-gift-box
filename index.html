@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>✨ Magic Gift Box ✨</title>
+    <title>✨ MAGIC GIFT BOX ✨</title>
     <meta name="referrer" content="no-referrer">
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -19,56 +19,70 @@
 
         body {
             min-height: 100vh;
-            background: radial-gradient(circle at 30% 30%, #ffdde1, #ee9ca7);
+            background: linear-gradient(145deg, #2b1b3a, #1a0f2a);
             font-family: 'Poppins', 'Segoe UI', sans-serif;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            perspective: 1500px;
+            perspective: 2000px;
             overflow-x: hidden;
             padding: 20px;
+            position: relative;
+        }
+
+        /* स्टार्स इफेक्ट */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
+                              radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                              radial-gradient(2px 2px at 80px 120px, #fff, rgba(0,0,0,0)),
+                              radial-gradient(2px 2px at 160px 50px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.3;
+            pointer-events: none;
         }
 
         /* लोडिंग स्पिनर */
         .loading {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.8);
+            background: rgba(10, 5, 20, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
             transition: opacity 0.5s;
         }
         .spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid #f3f3f3;
-            border-top: 6px solid #d32f2f;
+            width: 70px;
+            height: 70px;
+            border: 5px solid rgba(255,215,0,0.3);
+            border-top: 5px solid gold;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            box-shadow: 0 0 30px gold;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* मुख्य सीन */
         .scene {
-            width: 260px;
-            height: 260px;
+            width: 280px;
+            height: 280px;
             position: relative;
             transform-style: preserve-3d;
             cursor: pointer;
-            margin: 80px auto 30px;
-            transition: transform 0.5s ease;
-            animation: float 4s ease-in-out infinite;
+            margin: 100px auto 40px;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+            animation: levitate 5s ease-in-out infinite;
         }
-        @keyframes float {
+        @keyframes levitate {
             0%, 100% { transform: translateY(0) rotateX(-5deg) rotateY(-10deg); }
-            50% { transform: translateY(-15px) rotateX(-3deg) rotateY(-12deg); }
-        }
-        .scene:hover {
-            transform: scale(1.02) rotateX(-2deg) rotateY(-8deg);
+            50% { transform: translateY(-20px) rotateX(-3deg) rotateY(-15deg); }
         }
 
         /* क्यूब */
@@ -78,135 +92,271 @@
             position: absolute;
             transform-style: preserve-3d;
             transform: rotateX(-15deg) rotateY(-25deg);
-            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 1s cubic-bezier(0.34, 1.3, 0.64, 1);
         }
         .cube__face {
             position: absolute;
-            width: 260px;
-            height: 260px;
-            border: 2px solid rgba(255,255,255,0.3);
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.2);
+            width: 280px;
+            height: 280px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 0 50px rgba(255,255,255,0.3), 0 15px 25px rgba(0,0,0,0.5);
             background-size: cover;
             transition: all 0.5s;
+            border-radius: 8px;
         }
-        .cube__face--front { transform: rotateY(0deg) translateZ(130px); }
-        .cube__face--right { transform: rotateY(90deg) translateZ(130px); }
-        .cube__face--back { transform: rotateY(180deg) translateZ(130px); }
-        .cube__face--left { transform: rotateY(-90deg) translateZ(130px); }
-        .cube__face--top { transform: rotateX(90deg) translateZ(130px); }
-        .cube__face--bottom { transform: rotateX(-90deg) translateZ(130px); }
+        .cube__face--front { transform: rotateY(0deg) translateZ(140px); }
+        .cube__face--right { transform: rotateY(90deg) translateZ(140px); }
+        .cube__face--back { transform: rotateY(180deg) translateZ(140px); }
+        .cube__face--left { transform: rotateY(-90deg) translateZ(140px); }
+        .cube__face--top { transform: rotateX(90deg) translateZ(140px); }
+        .cube__face--bottom { transform: rotateX(-90deg) translateZ(140px); }
 
         /* खुला हुआ बॉक्स */
         .scene.open .cube {
-            transform: rotateX(-30deg) rotateY(-30deg);
+            transform: rotateX(-30deg) rotateY(-35deg);
         }
         .scene.open .cube__face--top {
-            transform: rotateX(160deg) translateZ(130px);
+            transform: rotateX(160deg) translateZ(140px);
             opacity: 0.9;
+            box-shadow: 0 -20px 30px rgba(0,0,0,0.6);
         }
 
-        /* कंटेंट कार्ड */
+        /* कंटेंट कार्ड – शानदार ग्लास इफेक्ट */
         .content-card {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) translateZ(0) scale(0);
-            width: 300px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            padding: 20px;
-            border-radius: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 4px rgba(255,215,0,0.5);
+            width: 320px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 25px;
+            border-radius: 40px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 0 3px rgba(255,215,0,0.5), 0 0 30px gold;
             text-align: center;
-            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
+            transition: all 0.9s cubic-bezier(0.34, 1.5, 0.64, 1) 0.3s;
             z-index: 200;
-            border: 2px solid gold;
+            border: 1px solid rgba(255,255,255,0.5);
         }
         .scene.open .content-card {
-            transform: translate(-50%, -150%) translateZ(150px) scale(1);
+            transform: translate(-50%, -160%) translateZ(160px) scale(1);
         }
 
         .sender-name {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, #d32f2f, #f06292);
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FF69B4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            text-shadow: 0 0 20px rgba(255,215,0,0.5);
+            margin-bottom: 15px;
+            letter-spacing: 1px;
         }
         .gift-image {
             width: 100%;
             max-height: 250px;
             object-fit: contain;
-            border-radius: 20px;
+            border-radius: 25px;
             margin: 15px 0;
-            background: #f9f9f9;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .message-text {
-            font-size: 1.2rem;
-            color: #333;
-            background: rgba(255,255,240,0.7);
-            padding: 15px;
-            border-radius: 50px;
-            font-style: italic;
-            border-left: 4px solid #d32f2f;
-        }
-
-        /* लेवल के अनुसार रंग (बेहतर ग्रेडिएंट) */
-        .lvl-1 .cube__face { background: linear-gradient(145deg, #e53935, #b71c1c); }
-        .lvl-2 .cube__face { background: linear-gradient(145deg, #FFD700, #FFA000); }
-        .lvl-3 .cube__face { background: linear-gradient(145deg, #0a0a0a, #1a1a1a); border: 2px solid #00E5FF; box-shadow: 0 0 30px #00E5FF; }
-        .lvl-4 .cube__face { background: linear-gradient(145deg, #E91E63, #C2185B); }
-        .lvl-5 .cube__face { background: linear-gradient(145deg, #424242, #212121); }
-        .lvl-6 .cube__face { background: linear-gradient(145deg, #8B6B61, #5D4037); }
-        .lvl-7 .cube__face { background: linear-gradient(145deg, #3f51b5, #9c27b0); }
-        .lvl-8 .cube__face { background: linear-gradient(145deg, #E0F7FA, #B2EBF2); border: 1px solid #fff; }
-        .lvl-9 .cube__face { background: linear-gradient(145deg, #f44336, #ff9800, #ffeb3b, #4caf50, #2196f3, #3f51b5, #9c27b0); }
-        .lvl-10 .cube__face { background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border: 2px solid white; box-shadow: 0 0 50px rgba(255,255,255,0.5); }
-
-        /* टैप टेक्स्ट */
-        .tap-hint {
-            font-size: 1.3rem;
-            color: white;
-            background: #d32f2f;
-            padding: 12px 30px;
-            border-radius: 50px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            letter-spacing: 1px;
-            font-weight: 600;
-            margin-top: 40px;
-            animation: pulse 2s infinite;
-            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 0 20px rgba(255,255,255,0.3);
             border: 2px solid gold;
         }
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-            50% { transform: scale(1.05); box-shadow: 0 15px 30px rgba(211,47,47,0.6); }
-            100% { transform: scale(1); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .message-text {
+            font-size: 1.3rem;
+            color: #fff;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            padding: 15px 20px;
+            border-radius: 50px;
+            font-style: italic;
+            border-left: 5px solid gold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
 
-        /* फुटर */
-        .footer {
+        /* प्रोफेशनल लेवल स्टाइल – हर एक यूनिक */
+        .lvl-1 .cube__face { 
+            background: linear-gradient(145deg, #d32f2f, #b71c1c);
+            position: relative;
+            overflow: hidden;
+        }
+        .lvl-1 .cube__face::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+            animation: shine 4s infinite;
+        }
+
+        .lvl-2 .cube__face { 
+            background: linear-gradient(145deg, #FFD700, #FF8C00);
+            box-shadow: 0 0 30px #FFD700;
+        }
+        .lvl-2 .cube__face::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(45deg, rgba(255,255,255,0.2) 0px, rgba(255,255,255,0.2) 10px, transparent 10px, transparent 20px);
+        }
+
+        .lvl-3 .cube__face { 
+            background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
+            border: 2px solid #00E5FF;
+            box-shadow: 0 0 40px #00E5FF, inset 0 0 20px #00E5FF;
+        }
+        .lvl-3 .cube__face::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 30% 30%, #00E5FF, transparent 70%);
+            opacity: 0.3;
+        }
+
+        .lvl-4 .cube__face { 
+            background: linear-gradient(145deg, #E91E63, #C2185B);
+            box-shadow: 0 0 30px #ff80ab;
+        }
+        .lvl-4 .cube__face::after {
+            content: '❤️';
+            position: absolute;
+            font-size: 30px;
+            opacity: 0.1;
+            transform: rotate(45deg);
+            top: 20px; left: 20px;
+        }
+
+        .lvl-5 .cube__face { 
+            background: linear-gradient(145deg, #616161, #212121);
+            border: 1px solid #9e9e9e;
+            box-shadow: 0 0 30px #616161;
+        }
+        .lvl-5 .cube__face::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #424242 25%, #757575 25%, #757575 50%, #424242 50%, #424242 75%, #757575 75%);
+            background-size: 20px 20px;
+            opacity: 0.3;
+        }
+
+        .lvl-6 .cube__face { 
+            background: linear-gradient(145deg, #8B6B61, #5D4037);
+            box-shadow: 0 0 20px #8B6B61;
+        }
+        .lvl-6 .cube__face::after {
+            content: '🌲';
+            font-size: 40px;
+            opacity: 0.1;
+            position: absolute;
+            bottom: 10px; right: 10px;
+        }
+
+        .lvl-7 .cube__face { 
+            background: linear-gradient(145deg, #3f51b5, #9c27b0, #3f51b5);
+            background-size: 200% 200%;
+            animation: galaxy 10s ease infinite;
+        }
+        @keyframes galaxy {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .lvl-7 .cube__face::after {
+            content: '✨';
+            font-size: 30px;
+            opacity: 0.3;
+            position: absolute;
+            top: 20px; left: 20px;
+        }
+
+        .lvl-8 .cube__face { 
+            background: linear-gradient(145deg, #E0F7FA, #B2EBF2);
+            border: 2px solid #fff;
+            box-shadow: 0 0 30px #fff, inset 0 0 20px #fff;
+        }
+        .lvl-8 .cube__face::after {
+            content: '💎';
+            font-size: 40px;
+            opacity: 0.3;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .lvl-9 .cube__face { 
+            background: linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet, red);
+            background-size: 400% 400%;
+            animation: rainbow 8s linear infinite;
+        }
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 400% 50%; }
+        }
+
+        .lvl-10 .cube__face { 
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.6);
+            box-shadow: 0 0 50px rgba(255,255,255,0.5), inset 0 0 30px rgba(255,255,255,0.3);
+        }
+        .lvl-10 .cube__face::after {
+            content: '';
+            position: absolute;
+            top: -10px; left: -10px; right: -10px; bottom: -10px;
+            background: inherit;
+            filter: blur(20px);
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        /* शाइन एनिमेशन */
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        /* टैप हिंट */
+        .tap-hint {
+            font-size: 1.5rem;
             color: white;
-            text-shadow: 1px 1px 2px black;
-            margin-top: 30px;
-            font-size: 0.9rem;
+            background: linear-gradient(45deg, #d32f2f, #c2185b);
+            padding: 15px 40px;
+            border-radius: 60px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4), 0 0 0 3px gold, 0 0 30px gold;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-top: 50px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            animation: glowPulse 2s infinite;
+        }
+        @keyframes glowPulse {
+            0% { box-shadow: 0 15px 30px rgba(0,0,0,0.4), 0 0 0 3px gold, 0 0 30px gold; }
+            50% { box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 0 5px gold, 0 0 60px gold; }
+            100% { box-shadow: 0 15px 30px rgba(0,0,0,0.4), 0 0 0 3px gold, 0 0 30px gold; }
+        }
+        .tap-hint:hover {
+            transform: scale(1.05);
         }
 
         /* रिस्पॉन्सिव */
         @media (max-width: 500px) {
-            .scene { width: 200px; height: 200px; }
-            .cube__face { width: 200px; height: 200px; }
-            .cube__face--front { transform: rotateY(0deg) translateZ(100px); }
-            .cube__face--right { transform: rotateY(90deg) translateZ(100px); }
-            .cube__face--back { transform: rotateY(180deg) translateZ(100px); }
-            .cube__face--left { transform: rotateY(-90deg) translateZ(100px); }
-            .cube__face--top { transform: rotateX(90deg) translateZ(100px); }
-            .cube__face--bottom { transform: rotateX(-90deg) translateZ(100px); }
-            .content-card { width: 240px; }
-            .sender-name { font-size: 1.4rem; }
+            .scene { width: 220px; height: 220px; margin-top: 70px; }
+            .cube__face { width: 220px; height: 220px; }
+            .cube__face--front { transform: rotateY(0deg) translateZ(110px); }
+            .cube__face--right { transform: rotateY(90deg) translateZ(110px); }
+            .cube__face--back { transform: rotateY(180deg) translateZ(110px); }
+            .cube__face--left { transform: rotateY(-90deg) translateZ(110px); }
+            .cube__face--top { transform: rotateX(90deg) translateZ(110px); }
+            .cube__face--bottom { transform: rotateX(-90deg) translateZ(110px); }
+            .content-card { width: 260px; padding: 20px; }
+            .sender-name { font-size: 1.8rem; }
+            .tap-hint { font-size: 1.2rem; padding: 12px 30px; }
         }
     </style>
 </head>
@@ -233,14 +383,11 @@
         </div>
     </div>
 
-    <!-- टैप करने का इशारा -->
-    <div class="tap-hint" onclick="openGift()">👉 टैप करें 👈</div>
-
-    <!-- फुटर (वैकल्पिक) -->
-    <div class="footer">❤️ जोश लव – आपके लिए ❤️</div>
+    <!-- टैप करने का बटन -->
+    <button class="tap-hint" onclick="openGift()">👉 OPEN GIFT 👈</button>
 
     <script>
-        // Firebase Config (आपका ही दिया हुआ)
+        // Firebase Config (आपका अपना)
         const firebaseConfig = {
             apiKey: "AIzaSyB24SehaHDOLuwzTLCkgCwXSpa6dVzrMOw",
             authDomain: "josh-de7d4.firebaseapp.com",
@@ -265,10 +412,10 @@
             db.ref('Gifts/' + giftId).once('value').then(snapshot => {
                 const data = snapshot.val();
                 if (data) {
-                    document.getElementById('sender').innerText = 'From: ' + (data.sender || 'गुप्तचर 💌');
-                    document.getElementById('message').innerText = data.message || 'कोई संदेश नहीं 😊';
+                    document.getElementById('sender').innerText = 'From: ' + (data.sender || 'Secret Admirer');
+                    document.getElementById('message').innerText = data.message || 'No message 😊';
 
-                    // इमेज प्रॉक्सी से लोड (CORS से बचने के लिए)
+                    // इमेज प्रॉक्सी से लोड
                     if (data.photo && !data.photo.includes('flaticon')) {
                         document.getElementById('giftImg').src = 'https://wsrv.nl/?url=' + encodeURIComponent(data.photo) + '&w=500&output=jpg';
                     } else {
@@ -279,7 +426,7 @@
                     const level = data.boxLevel || 1;
                     document.getElementById('boxCube').className = 'cube lvl-' + level;
                 } else {
-                    document.getElementById('sender').innerText = 'From: कोई गिफ्ट नहीं';
+                    document.getElementById('sender').innerText = 'From: Gift not found';
                 }
                 // लोडिंग हटाओ
                 document.getElementById('loading').style.opacity = '0';
@@ -289,15 +436,14 @@
             }).catch(error => {
                 console.error('Firebase error:', error);
                 document.getElementById('loading').style.display = 'none';
-                alert('डेटा लोड करने में समस्या हुई।');
+                alert('Error loading gift data.');
             });
         } else {
-            // अगर URL में ID नहीं है
             document.getElementById('sender').innerText = 'From: ?';
             document.getElementById('loading').style.display = 'none';
         }
 
-        // बॉक्स खोलने का फंक्शन (सिर्फ एक बार)
+        // बॉक्स खोलने का फंक्शन
         let isOpen = false;
         function openGift() {
             if (isOpen) return;
@@ -306,50 +452,45 @@
             const scene = document.getElementById('scene');
             scene.classList.add('open');
 
-            // कन्फेटी बरसाओ
+            // बड़ी कन्फेटी
             confetti({
-                particleCount: 120,
-                spread: 80,
+                particleCount: 150,
+                spread: 100,
                 origin: { y: 0.6 },
-                colors: ['#d32f2f', '#ffb300', '#f06292', '#ffffff', '#ffd700']
+                colors: ['#FFD700', '#FFA500', '#FF69B4', '#00E5FF', '#FF0000']
             });
 
-            // थोड़ी देर बाद और कन्फेटी
-            setTimeout(() => {
-                confetti({
-                    particleCount: 60,
-                    spread: 100,
-                    origin: { y: 0.5, x: 0.2 }
-                });
-                confetti({
-                    particleCount: 60,
-                    spread: 100,
-                    origin: { y: 0.5, x: 0.8 }
-                });
-            }, 200);
-
-            // छोटे दिलों की बौछार (extra effect)
-            const duration = 1000;
+            // दिलों की बारिश
+            const duration = 1500;
             const end = Date.now() + duration;
             (function frame() {
                 confetti({
-                    particleCount: 2,
+                    particleCount: 3,
                     angle: 60,
                     spread: 55,
-                    origin: { x: 0 },
-                    colors: ['#ff0000', '#ff69b4']
+                    origin: { x: 0, y: 0.5 },
+                    colors: ['#ff0000', '#ff69b4', '#ff1493']
                 });
                 confetti({
-                    particleCount: 2,
+                    particleCount: 3,
                     angle: 120,
                     spread: 55,
-                    origin: { x: 1 },
-                    colors: ['#ff0000', '#ff69b4']
+                    origin: { x: 1, y: 0.5 },
+                    colors: ['#ff0000', '#ff69b4', '#ff1493']
                 });
                 if (Date.now() < end) {
                     requestAnimationFrame(frame);
                 }
             }());
+
+            // थोड़ी देर बाद और कन्फेटी
+            setTimeout(() => {
+                confetti({
+                    particleCount: 100,
+                    spread: 80,
+                    origin: { y: 0.5 }
+                });
+            }, 300);
         }
     </script>
 </body>
