@@ -92,11 +92,13 @@
         }
         button.generate-btn:hover { transform: scale(1.03); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3); }
 
+        /* Canvas ab transparent background ke sath aayega */
         #cardCanvas {
             width: 90%; max-width: 600px;
-            border-radius: 18px;
+            /* CSS border-radius hata diya kyunki ab Canvas khud gol katega */
             box-shadow: 0 25px 50px rgba(0,0,0,0.9), 0 0 30px rgba(212, 175, 55, 0.3);
             display: none;
+            background: transparent;
         }
 
         .download-btn {
@@ -136,7 +138,6 @@
         // ==========================================
         // 🚨 FIREBASE SETUP (TERA DATABASE) 🚨
         // ==========================================
-        // Bhai, Firebase console se apna config yahan paste karna hai
         const firebaseConfig = {
             apiKey: "AIzaSyB24SehaHDOLuwzTLCkgCwXSpa6dVzrMOw",
             authDomain: "josh-de7d4.firebaseapp.com",
@@ -223,7 +224,6 @@
             const btn = document.getElementById('submitBtn');
             btn.innerText = "Processing..."; btn.disabled = true;
 
-            // Generate VIP Number
             const num1 = Math.floor(1000 + Math.random() * 9000);
             const num2 = Math.floor(1000 + Math.random() * 9000);
             const vipNumber = `SAJKU  ${num1}  ${num2}`;
@@ -237,13 +237,9 @@
                         vipNumber: vipNumber,
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    console.log("Data saved to Firebase successfully!");
-                } catch (error) {
-                    console.error("Error saving to Firebase: ", error);
-                }
+                } catch (error) {}
             }
 
-            // Draw Card
             if (uploadedImageObj.complete) {
                 generateRoyalCard(nameInput, vipNumber);
             } else {
@@ -254,6 +250,19 @@
         function generateRoyalCard(nameInput, vipNumber) {
             const canvas = document.getElementById('cardCanvas');
             const ctx = canvas.getContext('2d');
+
+            // Clear canvas completely to make it transparent
+            ctx.clearRect(0, 0, 1000, 630);
+
+            // ==========================================
+            // ROOT CAUSE SOLUTION: CLIPPING MASK FOR ROUND CORNERS
+            // ==========================================
+            ctx.save(); // Save the state
+            ctx.beginPath();
+            // HTML5 roundRect API (x, y, width, height, radius)
+            // 40px radius gives a perfect realistic credit card corner
+            ctx.roundRect(0, 0, 1000, 630, 40); 
+            ctx.clip(); // Ab jo bhi draw hoga, wo in gol kono ke andar hi hoga!
 
             // 1. BASE BLUE
             ctx.fillStyle = "#040A18"; 
@@ -386,6 +395,9 @@
             ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.fillText(dateStr, 748, nameY - 2);
             ctx.fillStyle = "#e8e8e8"; ctx.fillText(dateStr, 750, nameY);
 
+            // Restore the canvas context so clipping doesn't affect future draws
+            ctx.restore();
+
             // SHOW CANVAS & BUTTONS
             document.getElementById('panel').style.display = 'none';
             canvas.style.display = 'block';
@@ -395,8 +407,9 @@
         function downloadCard() {
             const canvas = document.getElementById('cardCanvas');
             const link = document.createElement('a');
-            link.download = 'Sajku_Identity_Card.jpg';
-            link.href = canvas.toDataURL("image/jpeg", 1.0); 
+            // ROOT CAUSE SOLUTION: Download as PNG for transparent rounded corners
+            link.download = 'Sajku_Identity_Card.png';
+            link.href = canvas.toDataURL("image/png"); 
             link.click();
         }
     </script>
