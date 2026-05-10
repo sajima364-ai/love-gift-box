@@ -2,290 +2,170 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>✨ Premium Magic Gift Box ✨</title>
-    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sajku - Official VIP Launch</title>
     
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <!-- Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+    <!-- Root Cause Solution: html2canvas library for taking screenshot of the card -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+    <!-- Firebase SDKs (Firebase 9+ Modular approach via compat for simple HTML) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* 2026 Premium Luxury UI/UX */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap');
 
         body {
-            min-height: 100vh;
-            background: radial-gradient(circle at 50% 50%, #ffe4e1, #ffb6c1);
+            margin: 0;
+            padding: 0;
             font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #0a3a2a 0%, #02120c 100%);
+            color: #ffffff;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-            perspective: 1200px; /* 3D Depth */
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* Loading Spinner */
-        .loading {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.9);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 1000; transition: opacity 0.5s;
-        }
-        .spinner {
-            width: 50px; height: 50px;
-            border: 5px solid #ffe4e1; border-top: 5px solid #ff3366;
-            border-radius: 50%; animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* 3D Scene Container */
-        .scene {
-            width: 200px; height: 200px;
-            position: relative;
-            transform-style: preserve-3d;
-            margin-top: 50px;
-        }
-
-        /* Floor Shadow */
-        .shadow {
-            position: absolute;
-            bottom: -50px; left: 50%;
-            width: 160px; height: 40px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 50%;
-            transform: translateX(-50%) rotateX(70deg);
-            filter: blur(8px);
-            animation: shadowPulse 3s ease-in-out infinite;
-            transition: all 0.5s;
-        }
-        .scene.open .shadow { opacity: 0.1; width: 200px; }
-
-        @keyframes shadowPulse {
-            0%, 100% { transform: translateX(-50%) rotateX(70deg) scale(1); }
-            50% { transform: translateX(-50%) rotateX(70deg) scale(0.8); opacity: 0.15; }
-        }
-
-        /* The Gift Box Wrapper */
-        .gift-box {
-            width: 160px; height: 160px;
-            position: absolute;
-            top: 50%; left: 50%;
-            transform-style: preserve-3d;
-            transform: translate(-50%, -50%) rotateX(-20deg) rotateY(-35deg);
-            cursor: pointer;
-            animation: floatBox 3s ease-in-out infinite;
-            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .gift-box:hover { transform: translate(-50%, -50%) rotateX(-15deg) rotateY(-20deg) scale(1.05); }
-
-        @keyframes floatBox {
-            0%, 100% { top: 50%; }
-            50% { top: 46%; }
-        }
-
-        /* Common Face Styles */
-        .face {
-            position: absolute;
-            display: flex; justify-content: center; align-items: center;
-            border: 1px solid rgba(0,0,0,0.1);
-            transform-style: preserve-3d;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
-        }
-
-        /* Ribbon Effect (Using Pseudo Elements) */
-        .face::before, .face::after {
-            content: ''; position: absolute; background: linear-gradient(to right, #FFD700, #FFA500, #FFD700);
-            box-shadow: 0 0 5px rgba(0,0,0,0.3);
-        }
-        .face::before { width: 24px; height: 100%; top: 0; left: 50%; transform: translateX(-50%); } /* Vertical Ribbon */
-        .face::after { width: 100%; height: 24px; left: 0; top: 50%; transform: translateY(-50%); } /* Horizontal Ribbon */
-
-        /* Base Colors (Dynamically changed via CSS variables) */
-        :root {
-            --box-color-1: #e53935; --box-color-2: #b71c1c; /* Default Red */
-        }
-        .box-bg {
-            background: linear-gradient(135deg, var(--box-color-1), var(--box-color-2));
-        }
-
-        /* ================= BASE OF THE BOX ================= */
-        .base { width: 160px; height: 140px; position: absolute; bottom: 0; transform-style: preserve-3d; }
-        .base .face { width: 160px; height: 140px; }
-        .base .face.front  { transform: rotateY(0deg) translateZ(80px); }
-        .base .face.back   { transform: rotateY(180deg) translateZ(80px); }
-        .base .face.right  { transform: rotateY(90deg) translateZ(80px); }
-        .base .face.left   { transform: rotateY(-90deg) translateZ(80px); }
-        .base .face.bottom { width: 160px; height: 160px; transform: rotateX(-90deg) translateZ(70px); background: #333; box-shadow: none;}
-        .base .face.bottom::before, .base .face.bottom::after { display: none; }
-        .base .face.inside { width: 156px; height: 156px; background: #222; transform: rotateX(90deg) translateZ(68px); box-shadow: inset 0 0 50px black;}
-        .base .face.inside::before, .base .face.inside::after { display: none; }
-
-        /* ================= LID OF THE BOX ================= */
-        .lid {
-            width: 164px; height: 40px;
-            position: absolute; top: -5px; left: -2px;
-            transform-style: preserve-3d;
-            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            transform-origin: bottom center;
-        }
-        .lid .face { height: 40px; width: 164px; }
-        .lid .face.top { width: 164px; height: 164px; transform: rotateX(90deg) translateZ(20px); }
-        .lid .face.front { transform: rotateY(0deg) translateZ(82px); }
-        .lid .face.back { transform: rotateY(180deg) translateZ(82px); }
-        .lid .face.right { transform: rotateY(90deg) translateZ(82px); width: 164px; left: 0px;}
-        .lid .face.left { transform: rotateY(-90deg) translateZ(82px); width: 164px; left: 0px;}
-        
-        /* Remove horizontal ribbon from lid sides */
-        .lid .face.front::after, .lid .face.back::after, .lid .face.right::after, .lid .face.left::after { display: none; }
-
-        /* 3D Bow on Top */
-        .bow {
-            position: absolute;
-            font-size: 50px;
-            transform: translateZ(10px) rotateX(-90deg) rotateY(180deg);
-            text-shadow: 0 5px 10px rgba(0,0,0,0.4);
-            z-index: 10;
-        }
-
-        /* ================= OPEN ANIMATION ================= */
-        .scene.open .gift-box {
-            animation: none;
-            transform: translate(-50%, -50%) rotateX(-10deg) rotateY(-15deg);
-        }
-        .scene.open .lid {
-            transform: translateY(-120px) translateZ(-50px) rotateX(45deg) rotateZ(20deg) scale(0.8);
-            opacity: 0;
-        }
-
-        /* ================= CONTENT CARD ================= */
-        .content-card {
-            position: absolute;
-            top: 40%; left: 50%;
-            width: 300px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 0 0 3px #FFD700;
+        .glass-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 24px;
+            padding: 40px 30px;
+            width: 90%;
+            max-width: 450px;
             text-align: center;
-            transform: translate(-50%, 0) scale(0.1);
-            opacity: 0;
-            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 200;
-            pointer-events: none;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            text-shadow: 0px 4px 10px rgba(255, 215, 0, 0.2);
+        }
+
+        .tagline {
+            font-size: 12px;
+            letter-spacing: 3px;
+            color: #d4af37;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { font-size: 12px; color: #a0a0a0; margin-bottom: 5px; display: block; text-transform: uppercase; }
         
-        .scene.open .content-card {
-            transform: translate(-50%, -120%) scale(1);
-            opacity: 1;
-            pointer-events: auto;
+        input, select {
+            width: 100%; padding: 15px; background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 12px;
+            color: white; font-size: 16px; font-family: 'Poppins', sans-serif;
+            box-sizing: border-box; outline: none; transition: 0.3s;
+        }
+        input:focus, select:focus { border-color: #d4af37; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+
+        .gold-btn {
+            width: 100%; padding: 16px;
+            background: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728);
+            border: none; border-radius: 12px; color: #000;
+            font-size: 18px; font-weight: 600; cursor: pointer;
+            text-transform: uppercase; transition: 0.2s; margin-top: 10px;
+        }
+        .gold-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3); }
+
+        /* VIP Card Design */
+        .vip-card-wrapper { display: none; margin-top: 20px; }
+        
+        /* Card jiska screenshot lena hai */
+        #captureCard {
+            background: linear-gradient(135deg, #111, #1a3a2a);
+            border: 1px solid #d4af37;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: left;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        .sender-name {
-            font-size: 1.6rem; font-weight: 800;
-            background: linear-gradient(45deg, #ff3366, #ff9933);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 12px;
-        }
-        .gift-image {
-            width: 100%; height: 200px; object-fit: cover;
-            border-radius: 12px; margin-bottom: 15px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-            border: 2px solid #eee;
-        }
-        .message-text {
-            font-size: 1.1rem; color: #444; font-weight: 600;
-            background: #fff0f5; padding: 12px; border-radius: 12px;
-            border-left: 4px solid #ff3366;
-        }
+        .chip { width: 40px; height: 30px; background: linear-gradient(135deg, #e0c371, #b38728); border-radius: 5px; margin-bottom: 20px; }
+        .card-brand { position: absolute; top: 25px; right: 25px; font-family: 'Playfair Display', serif; color: #d4af37; font-size: 24px; font-weight: bold; }
+        .card-number { font-family: 'Courier New', Courier, monospace; font-size: 20px; color: #fff; letter-spacing: 2px; margin-bottom: 15px; }
+        .card-holder-label { font-size: 10px; color: #888; text-transform: uppercase; }
+        .card-holder-name { font-size: 18px; color: #d4af37; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;}
 
-        /* Buttons & Hints */
-        .tap-btn {
-            position: absolute;
-            bottom: 60px;
-            background: linear-gradient(45deg, #ff3366, #ff0055);
-            color: white; font-size: 1.2rem; font-weight: 600;
-            padding: 12px 35px; border-radius: 30px;
-            box-shadow: 0 10px 20px rgba(255, 51, 102, 0.4);
-            border: 2px solid #FFD700;
-            cursor: pointer; z-index: 300;
-            animation: pulseBtn 1.5s infinite;
+        .whatsapp-btn {
+            background: #25D366; color: white; border: none; padding: 15px;
+            width: 100%; border-radius: 12px; font-size: 16px; font-weight: bold;
+            margin-top: 20px; cursor: pointer; display: none;
         }
-        @keyframes pulseBtn {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
-        }
-        .scene.open + .tap-btn { display: none; } /* Hide button when open */
-
-        .footer {
-            position: absolute; bottom: 15px;
-            color: #d81b60; font-weight: 600; font-size: 0.9rem;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
-        }
-
-        /* Level Colors via Root Variables update */
-        .lvl-1 { --box-color-1: #e53935; --box-color-2: #b71c1c; }
-        .lvl-2 { --box-color-1: #1E88E5; --box-color-2: #0D47A1; } /* Blue */
-        .lvl-3 { --box-color-1: #43A047; --box-color-2: #1B5E20; } /* Green */
-        .lvl-4 { --box-color-1: #8E24AA; --box-color-2: #4A148C; } /* Purple */
-        .lvl-5 { --box-color-1: #212121; --box-color-2: #000000; } /* Black Premium */
-
     </style>
 </head>
 <body>
 
-    <!-- Loading Screen -->
-    <div class="loading" id="loading">
-        <div class="spinner"></div>
-    </div>
+    <div class="glass-container">
+        <h1 class="logo-text">Sajku</h1>
+        <div class="tagline">Premium Fast Service</div>
 
-    <!-- 3D Scene Wrapper -->
-    <div class="scene" id="scene">
-        <div class="shadow"></div>
-
-        <!-- Professional Gift Box -->
-        <div class="gift-box lvl-1" id="giftBox" onclick="openBox()">
+        <div id="form-section">
+            <p style="font-size: 14px; color: #ccc; margin-bottom: 25px;">
+                Join the Elite Club. Get exclusive access to premium electronics & beauty products.
+            </p>
             
-            <!-- Base of the box -->
-            <div class="base">
-                <div class="face front box-bg"></div>
-                <div class="face back box-bg"></div>
-                <div class="face right box-bg"></div>
-                <div class="face left box-bg"></div>
-                <div class="face bottom"></div>
-                <div class="face inside"></div> <!-- Inside depth -->
-            </div>
-
-            <!-- Lid of the box -->
-            <div class="lid" id="boxLid">
-                <div class="face top box-bg"><div class="bow">🎀</div></div>
-                <div class="face front box-bg"></div>
-                <div class="face back box-bg"></div>
-                <div class="face right box-bg"></div>
-                <div class="face left box-bg"></div>
-            </div>
-            
+            <form id="sajkuForm" onsubmit="event.preventDefault(); processVIP();">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="userName" placeholder="Enter your name" required>
+                </div>
+                <div class="input-group">
+                    <label>WhatsApp Number</label>
+                    <input type="tel" id="userPhone" placeholder="10-digit number" pattern="[0-9]{10}" required>
+                </div>
+                <div class="input-group">
+                    <label>What are you looking for?</label>
+                    <select id="userInterest" required>
+                        <option value="" disabled selected>Select your interest</option>
+                        <option value="Smartwatches & Earbuds">Smartwatches & Earbuds</option>
+                        <option value="Premium Makeup & Beauty">Premium Makeup & Beauty</option>
+                        <option value="Mobile Accessories">Mobile Accessories</option>
+                    </select>
+                </div>
+                <button type="submit" class="gold-btn" id="submitBtn">Generate VIP Pass</button>
+            </form>
         </div>
 
-        <!-- Premium Content Card (Pops up from inside) -->
-        <div class="content-card">
-            <div class="sender-name" id="sender">From: Loading...</div>
-            <img class="gift-image" id="giftImg" src="" alt="Gift" referrerpolicy="no-referrer" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4213/4213958.png'">
-            <div class="message-text" id="message">...</div>
+        <!-- The Generated VIP Card -->
+        <div class="vip-card-wrapper" id="vipCardWrapper">
+            <!-- Is div ka screenshot liya jayega -->
+            <div id="captureCard">
+                <div class="chip"></div>
+                <div class="card-brand">Sajku</div>
+                <div class="card-number" id="cardNumber">SAJKU 0000 0000</div>
+                <div class="card-holder-label">Founding Member</div>
+                <div class="card-holder-name" id="cardName">JOHN DOE</div>
+            </div>
+            
+            <p style="font-size: 12px; color: #4CAF50; margin-top: 15px;" id="successMsg">✔ VIP Pass Activated & Saved to Server!</p>
+            
+            <button class="whatsapp-btn" id="shareBtn" onclick="shareCardAsImage()">
+                📸 Share Card on WhatsApp Status
+            </button>
         </div>
     </div>
-
-    <div class="tap-btn" onclick="openBox()">👉 ओपन करें 👈</div>
-    
-    <div class="footer">❤️ जोश लव – आपके लिए ❤️</div>
 
     <script>
-        // Firebase Config
+        // ==========================================
+        // 🚨 FIREBASE SETUP (TERA DATABASE) 🚨
+        // ==========================================
+        // Bhai, Firebase console se apna config yahan paste karna hai
         const firebaseConfig = {
             apiKey: "AIzaSyB24SehaHDOLuwzTLCkgCwXSpa6dVzrMOw",
             authDomain: "josh-de7d4.firebaseapp.com",
@@ -296,97 +176,104 @@
             appId: "1:1036207436233:web:59aa121374c9a89d4e3818"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        // Initialize Firebase (Agar config khali hai toh error na aaye isliye try-catch)
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+        } catch (e) {
+            console.log("Firebase config abhi nahi daala hai. Local testing chal rahi hai.");
+        }
 
-        // Get ID
-        const urlParams = new URLSearchParams(window.location.search);
-        const giftId = urlParams.get('id');
+        // ==========================================
+        // LOGIC: Generate Card & Save to Firebase
+        // ==========================================
+        async function processVIP() {
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "Processing...";
+            btn.disabled = true;
 
-        // Load Data
-        if (giftId) {
-            db.ref('Gifts/' + giftId).once('value').then(snapshot => {
-                const data = snapshot.val();
-                if (data) {
-                    document.getElementById('sender').innerText = 'From: ' + (data.sender || 'Secret Admirer');
-                    document.getElementById('message').innerText = data.message || 'Surprise! 🎁';
+            const name = document.getElementById('userName').value;
+            const phone = document.getElementById('userPhone').value;
+            const interest = document.getElementById('userInterest').value;
 
-                    if (data.photo && !data.photo.includes('flaticon')) {
-                        document.getElementById('giftImg').src = 'https://wsrv.nl/?url=' + encodeURIComponent(data.photo) + '&w=500&output=jpg';
+            // Generate VIP Number
+            const num1 = Math.floor(1000 + Math.random() * 9000);
+            const num2 = Math.floor(1000 + Math.random() * 9000);
+            const vipNumber = `SAJKU ${num1} ${num2}`;
+
+            // Save to Firebase Firestore
+            if (db) {
+                try {
+                    await db.collection("vip_members").add({
+                        name: name,
+                        phone: phone,
+                        interest: interest,
+                        vipNumber: vipNumber,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error("Error saving to Firebase: ", error);
+                }
+            }
+
+            // Update UI
+            document.getElementById('form-section').style.display = 'none';
+            document.getElementById('vipCardWrapper').style.display = 'block';
+            document.getElementById('shareBtn').style.display = 'block';
+            
+            document.getElementById('cardName').innerText = name;
+            document.getElementById('cardNumber').innerText = vipNumber;
+        }
+
+        // ==========================================
+        // ELITE JUGAAD: Convert HTML to Image & Share
+        // ==========================================
+        async function shareCardAsImage() {
+            const shareBtn = document.getElementById('shareBtn');
+            shareBtn.innerText = "Generating Image... ⏳";
+            
+            const cardElement = document.getElementById('captureCard');
+            
+            try {
+                // 1. Take Screenshot of the Card
+                const canvas = await html2canvas(cardElement, {
+                    scale: 2, // High Quality Image
+                    backgroundColor: "#111111"
+                });
+
+                // 2. Convert Canvas to Blob (File)
+                canvas.toBlob(async function(blob) {
+                    const file = new File([blob], "Sajku_VIP_Card.jpg", { type: "image/jpeg" });
+                    
+                    const shareData = {
+                        title: 'Sajku VIP Member',
+                        text: 'I just became a Founding VIP Member of Sajku! Get yours before the waitlist closes! ✨',
+                        files: [file] // YAHAN PHOTO ATTACH HO RAHI HAI!
+                    };
+
+                    // 3. Check if mobile browser supports sharing files
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share(shareData);
+                        shareBtn.innerText = "📸 Share Card on WhatsApp Status";
                     } else {
-                        document.getElementById('giftImg').src = 'https://cdn-icons-png.flaticon.com/512/4213/4213958.png';
+                        // Fallback for Desktop or old browsers: Download the image
+                        alert("Aapka browser direct share support nahi karta. Card download ho raha hai, isko WhatsApp par laga lijiye!");
+                        const link = document.createElement('a');
+                        link.download = 'Sajku_VIP_Card.jpg';
+                        link.href = canvas.toDataURL("image/jpeg");
+                        link.click();
+                        shareBtn.innerText = "📸 Share Card on WhatsApp Status";
                     }
+                }, 'image/jpeg', 0.9);
 
-                    // Set Level Colors (1 to 5 mapping)
-                    let level = parseInt(data.boxLevel) || 1;
-                    if(level > 5) level = (level % 5) + 1; 
-                    document.getElementById('giftBox').className = 'gift-box lvl-' + level;
-                }
-                hideLoading();
-            }).catch(error => {
-                console.error('Error:', error);
-                hideLoading();
-            });
-        } else {
-            hideLoading();
-            document.getElementById('sender').innerText = 'Demo Gift Box';
-            document.getElementById('message').innerText = 'You found a premium magic box!';
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').style.opacity = '0';
-            setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
-        }
-
-        let isOpen = false;
-        function openBox() {
-            if (isOpen) return;
-            isOpen = true;
-
-            // Trigger Animation via CSS Class
-            document.getElementById('scene').classList.add('open');
-
-            // Sound effect (Optional but adds premium feel)
-            // let audio = new Audio('pop-sound-url.mp3'); audio.play();
-
-            // Premium Confetti Burst
-            let end = Date.now() + 2000;
-            let colors =['#FFD700', '#ff3366', '#ffffff', '#FF69B4'];
-
-            (function frame() {
-                confetti({
-                    particleCount: 5,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: colors,
-                    zIndex: 1000
-                });
-                confetti({
-                    particleCount: 5,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: colors,
-                    zIndex: 1000
-                });
-
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
-            }());
-
-            // Big center pop
-            setTimeout(() => {
-                confetti({
-                    particleCount: 150,
-                    spread: 100,
-                    origin: { y: 0.6 },
-                    colors: colors,
-                    disableForReducedMotion: true
-                });
-            }, 300);
+            } catch (error) {
+                console.error("Error generating image: ", error);
+                alert("Image banne mein error aayi.");
+                shareBtn.innerText = "📸 Share Card on WhatsApp Status";
+            }
         }
     </script>
+
 </body>
 </html>
